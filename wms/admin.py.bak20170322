@@ -1,0 +1,180 @@
+# -*-coding:utf-8-*-
+
+from __future__ import unicode_literals
+
+from django.contrib import admin
+
+# Register your models here.
+
+from import_export.admin import ImportExportModelAdmin
+from django_admin_listfilter_dropdown.filters import DropdownFilter, RelatedDropdownFilter
+
+from import_export import resources
+from .models import Customer, Product, OrderInProductship, OrderOutProductship, OrderOut, OrderIn, Warehouse
+
+
+class ProductResource(resources.ModelResource):
+    class Meta:
+        model = Product
+
+class ProductAdmin(ImportExportModelAdmin):
+    resource_class = ProductResource
+    list_display = ['customer', 'help_name', 'name', 'ename','batch_num', 'type', 'categories', 'base_unit',
+                    'pcs_perunit', 'Logistics_unit', 'pcs_Logistics', 'life_day', 'price',
+                    'width', 'height', 'length', 'weight', 'volume', 'net_weight', 'valid_flag', 'barcode']
+
+    fieldsets = [
+        (None, {'fields': ['customer', 'help_name', 'name', 'ename', 'pcs_Logistics',
+                           'batch_num', 'type', 'categories', 'base_unit', 'pcs_perunit', 'barcode', ]}),
+
+        (u'包装信息', {'fields': ['life_day', 'price', 'width', 'height', 'length', 'weight',
+                              'net_weight', 'valid_flag', 'Logistics_unit', 'specs', 'brand', 'ordinal'],
+                   'classes': ['collapse']}),
+    ]
+    search_fields = ['customer', 'help_name', 'name', 'ename', 'batch_num', 'type']
+    list_filter = (
+        # for ordinary fields
+        ('name', DropdownFilter),
+        ('ename', DropdownFilter),
+        ('help_name', DropdownFilter),
+        ('batch_num', DropdownFilter),
+        ('categories', DropdownFilter),
+        ('valid_flag', DropdownFilter),
+        # for related fields
+        ('customer', RelatedDropdownFilter),
+    )
+admin.site.register(Product, ProductAdmin)
+
+class CustomerResource(resources.ModelResource):
+    class Meta:
+        model = Customer
+        import_id_fields = ('name',)
+        fields = ('name', 'address', 'city', 'tel', 'phone', 'email')
+
+
+class CustomerAdmin(ImportExportModelAdmin):
+    resource_class = CustomerResource
+    list_display = ['name', 'address', 'city', 'tel', 'phone', 'email']
+    search_fields = ['name', 'address', 'city', 'tel', 'phone', 'email']
+    list_filter = (
+        # for ordinary fields
+        ('name', DropdownFilter),
+        ('address', DropdownFilter),
+        ('tel', DropdownFilter),
+        ('phone', DropdownFilter),
+    )
+admin.site.register(Customer, CustomerAdmin)
+
+
+class WarehouseResource(resources.ModelResource):
+    class Meta:
+        model = Warehouse
+
+class WarehouseAdmin(ImportExportModelAdmin):
+    resource_class = WarehouseResource
+    list_display = ['name', 'ename', 'address', 'type']
+    search_fields = ['name', 'ename', 'address', 'type',]
+admin.site.register(Warehouse, WarehouseAdmin)
+
+class OrderInProductshipResource(resources.ModelResource):
+    class Meta:
+        model = OrderInProductship
+        # import_id_fields = ('orderin',)
+
+class OrderInProductshipAdmin(ImportExportModelAdmin):
+    resource_class = OrderInProductshipResource
+    list_display = ['orderin', 'product', 'barcode', 'orderin_pcs',]
+
+    def barcode(self, obj):
+        return obj.product.barcode
+    barcode.short_description = (u"条形码")
+
+admin.site.register(OrderInProductship, OrderInProductshipAdmin)
+
+class OrderInProductshipInline(admin.TabularInline):
+    fieldsets = (('', {
+        'fields': (
+            'product',
+            'orderin_pcs',
+        )
+    }),)
+    model = OrderInProductship
+    extra = 5
+
+class OrderOutProductshipInline(admin.TabularInline):
+    fieldsets = (('', {
+        'fields': (
+            'product',
+            'orderout_pcs',
+        )
+    }),)
+    model = OrderOutProductship
+    extra = 5
+
+class OrderInResource(resources.ModelResource):
+    class Meta:
+        model = OrderIn
+        fields = ('in_number', 'customer', 'pcs', 'warehouse', 'plan_in_time')
+
+
+class OrderInAdmin(ImportExportModelAdmin):
+    resource_class = OrderInResource
+    list_display = ['in_number', 'customer', 'pcs', 'warehouse',
+                    'order_type', 'order_comment', 'operator', 'order_state', 'in_store','plan_in_time']
+    search_fields = ['in_number', 'customer__name', 'in_store', 'order_state', 'product__name']
+    list_filter = (
+        # for ordinary fields
+        ('customer__name', DropdownFilter),
+        ('order_state', DropdownFilter),
+        ('in_store', DropdownFilter),
+        ('warehouse__name', DropdownFilter),
+        ('order_type', DropdownFilter),
+        ('operate_date', DropdownFilter),
+        # for related fields
+        ('product', RelatedDropdownFilter)
+    )
+    inlines = [OrderInProductshipInline]
+    fieldsets = [
+        (None, {'fields': ['in_number', 'warehouse', 'customer', 'invoice',  'pcs', 'boxes',
+                           ('order_type', 'order_state'), 'in_store','plan_in_time']}),
+
+        (u'扩展信息', {'fields': ['sender', 'serial_number', 'order_comment', 'receiver', 'operator',
+                              'fact_in_time', ],
+                   'classes': ['collapse']}),
+    ]
+
+admin.site.register(OrderIn, OrderInAdmin)
+
+
+class OrderOutResource(resources.ModelResource):
+    class Meta:
+        model = OrderOut
+       # import_id_fields = ('order_id',)
+
+class OrderOutAdmin(ImportExportModelAdmin):
+    resource_class = OrderOutResource
+    list_display = ['out_number', 'pcs', 'boxes', 'customer', 'warehouse',
+                    'order_type', 'order_comment', 'operator', 'order_state', ]
+    search_fields = ['in_number', 'customer__name', 'order_state', 'warehouse__ename',]
+    list_filter = (
+        # for ordinary fields
+        ('customer__name', DropdownFilter),
+        ('order_state', DropdownFilter),
+        ('warehouse__ename', DropdownFilter),
+        ('order_type', DropdownFilter),
+        ('operate_date', DropdownFilter),
+    )
+    inlines = [OrderOutProductshipInline]
+    fieldsets = [
+        (None, {'fields': ['out_number', 'warehouse', 'customer', 'invoice', 'pcs', 'boxes',
+                           ('order_type', 'order_state'), 'in_store', 'fact_out_time']}),
+
+        (u'扩展信息', {'fields': ['serial_number',  ('receiver','receiver_addr','receiver_phone'),
+                              ('order_comment','operator'),],
+                   'classes': ['collapse']}),
+    ]
+
+admin.site.register(OrderOut, OrderOutAdmin)
+
+
+
