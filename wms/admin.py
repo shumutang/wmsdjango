@@ -11,14 +11,17 @@ from import_export.admin import ImportExportModelAdmin
 # from django_admin_listfilter_dropdown.filters import DropdownFilter, RelatedDropdownFilter
 
 from import_export import resources
-from .models import Customer, Product, Location, Warehouse
-from .models import OrderInProductship, OrderOutProductship, OrderOut, OrderIn
+from .models import Customer , Product , Location , Warehouse
+from .models import OrderInProductship , OrderOutProductship , OrderOut , OrderIn
+
+from time import time
+from datetime import datetime
 
 
 class ProductResource(resources.ModelResource):
     class Meta:
         model = Product
-        import_id_fields = ('product_id',)
+        import_id_fields = ('product_id' ,)
 
 
 class ProductAdmin(ImportExportModelAdmin):
@@ -37,18 +40,18 @@ class ProductAdmin(ImportExportModelAdmin):
         , 'pcs_Logistics'
         , 'life_day'
         , 'price'
-        , 'width', 'height', 'length', 'weight', 'volume', 'net_weight', 'valid_flag', 'barcode']
+        , 'width' , 'height' , 'length' , 'weight' , 'volume' , 'net_weight' , 'valid_flag' , 'barcode']
 
     fieldsets = [
-        (None, {'fields': ['product_id'
+        (None , {'fields': ['product_id'
             , 'name'
             , 'ename'
             , 'customer'
             , 'help_name'
             , 'pcs_Logistics'
-            , 'batch_num', 'type', 'categories', 'base_unit', 'pcs_perunit', 'barcode', ]}),
+            , 'batch_num' , 'type' , 'categories' , 'base_unit' , 'pcs_perunit' , 'barcode' , ]}) ,
 
-        (u'包装信息', {'fields': ['life_day'
+        (u'包装信息' , {'fields': ['life_day'
             , 'price'
             , 'width'
             , 'height'
@@ -59,46 +62,46 @@ class ProductAdmin(ImportExportModelAdmin):
             , 'Logistics_unit'
             , 'specs'
             , 'brand'
-            , 'ordinal'],
-                   'classes': ['collapse']}),
+            , 'ordinal'] ,
+                    'classes': ['collapse']}) ,
     ]
-    search_fields = ['product_id', 'customer', 'help_name', 'name', 'ename', 'batch_num', 'type']
+    search_fields = ['product_id' , 'customer' , 'help_name' , 'name' , 'ename' , 'batch_num' , 'type']
     list_filter = [
         # for ordinary fields
-        'name',
-        'ename',
-        'help_name',
-        'batch_num',
-        'categories',
-        'valid_flag',
+        'name' ,
+        'ename' ,
+        'help_name' ,
+        'batch_num' ,
+        'categories' ,
+        'valid_flag' ,
         'customer'
     ]
 
 
-admin.site.register(Product, ProductAdmin)
+admin.site.register(Product , ProductAdmin)
 
 
 class CustomerResource(resources.ModelResource):
     class Meta:
         model = Customer
-        import_id_fields = ('name',)
-        fields = ('name', 'address', 'city', 'tel', 'phone', 'email')
+        import_id_fields = ('name' ,)
+        fields = ('name' , 'address' , 'city' , 'tel' , 'phone' , 'email')
 
 
 class CustomerAdmin(ImportExportModelAdmin):
     resource_class = CustomerResource
-    list_display = ['customer_id','name', 'address', 'city', 'tel', 'phone', 'email']
-    search_fields = ['name', 'address', 'city', 'tel', 'phone', 'email']
+    list_display = ['customer_id' , 'name' , 'address' , 'city' , 'tel' , 'phone' , 'email']
+    search_fields = ['name' , 'address' , 'city' , 'tel' , 'phone' , 'email']
     list_filter = [
         # for ordinary fields
-        'name',
-        'address',
-        'tel',
-        'phone',
+        'name' ,
+        'address' ,
+        'tel' ,
+        'phone' ,
     ]
 
 
-admin.site.register(Customer, CustomerAdmin)
+admin.site.register(Customer , CustomerAdmin)
 
 
 class WarehouseResource(resources.ModelResource):
@@ -108,11 +111,11 @@ class WarehouseResource(resources.ModelResource):
 
 class WarehouseAdmin(ImportExportModelAdmin):
     resource_class = WarehouseResource
-    list_display = ['name', 'ename', 'address', 'type']
-    search_fields = ['name', 'ename', 'address', 'type', ]
+    list_display = ['name' , 'ename' , 'address' , 'type']
+    search_fields = ['name' , 'ename' , 'address' , 'type' , ]
 
 
-admin.site.register(Warehouse, WarehouseAdmin)
+admin.site.register(Warehouse , WarehouseAdmin)
 
 
 class OrderInProductshipResource(resources.ModelResource):
@@ -120,18 +123,17 @@ class OrderInProductshipResource(resources.ModelResource):
         model = OrderInProductship
         # import_id_fields = ('orderin',)
 
-
 class OrderInProductshipAdmin(ImportExportModelAdmin):
     resource_class = OrderInProductshipResource
-    list_display = ['orderin', 'product', 'barcode', 'orderin_pcs', ]
+    list_display = ['orderin' , 'product' , 'barcode' , 'orderin_pcs' , ]
 
-    def barcode(self, obj):
+    def barcode(self , obj):
         return obj.product.barcode
 
     barcode.short_description = (u"条形码")
 
 
-admin.site.register(OrderInProductship, OrderInProductshipAdmin)
+admin.site.register(OrderInProductship , OrderInProductshipAdmin)
 
 
 class OrderOutProductshipResource(resources.ModelResource):
@@ -142,35 +144,35 @@ class OrderOutProductshipResource(resources.ModelResource):
 
 class OrderOutProductshipAdmin(ImportExportModelAdmin):
     resource_class = OrderOutProductshipResource
-    list_display = ['orderout', 'product', 'barcode', 'orderout_pcs', ]
+    list_display = ['orderout' , 'product' , 'barcode' , 'orderout_pcs' , ]
 
-    def barcode(self, obj):
+    def barcode(self , obj):
         return obj.product.barcode
 
     barcode.short_description = (u"条形码")
 
 
-admin.site.register(OrderOutProductship, OrderOutProductshipAdmin)
+admin.site.register(OrderOutProductship , OrderOutProductshipAdmin)
 
 
 class OrderInProductshipInline(admin.TabularInline):
-    fieldsets = (('', {
+    fieldsets = (('' , {
         'fields': (
-            'product',
-            'orderin_pcs',
+            'product' ,
+            'orderin_pcs' ,
         )
-    }),)
+    }) ,)
     model = OrderInProductship
     extra = 5
 
 
 class OrderOutProductshipInline(admin.TabularInline):
-    fieldsets = (('', {
+    fieldsets = (('' , {
         'fields': (
-            'product',
-            'orderout_pcs',
+            'product' ,
+            'orderout_pcs' ,
         )
-    }),)
+    }) ,)
     model = OrderOutProductship
     extra = 5
 
@@ -178,7 +180,7 @@ class OrderOutProductshipInline(admin.TabularInline):
 class OrderInResource(resources.ModelResource):
     class Meta:
         model = OrderIn
-        fields = ('in_number', 'customer', 'pcs', 'warehouse', 'plan_in_time')
+        fields = ('in_number' , 'customer' , 'pcs' , 'warehouse' , 'plan_in_time')
 
 
 class OrderInAdmin(ImportExportModelAdmin):
@@ -192,39 +194,49 @@ class OrderInAdmin(ImportExportModelAdmin):
         , 'operator'
         , 'order_state'
         , 'in_store'
-        , 'plan_in_time']
-    search_fields = ['in_number', 'customer__name', 'in_store', 'order_state', 'product__name']
+        , 'plan_in_time'
+        , 'serial_number']
+    search_fields = ['in_number' , 'customer__name' , 'in_store' , 'order_state' , 'product__name']
     list_filter = [
         # for ordinary fields
-        'customer__name',
-        'order_state',
-        'in_store',
-        'warehouse__name',
-        'order_type',
-        'operate_date',
-        'product',
+        'customer__name' ,
+        'order_state' ,
+        'in_store' ,
+        'warehouse__name' ,
+        'order_type' ,
+        'operate_date' ,
+        'product' ,
     ]
     inlines = [OrderInProductshipInline]
     fieldsets = [
-        (None, {'fields': ['in_number'
+        (None , {'fields': ['in_number'
             , 'warehouse'
             , 'customer'
             , 'invoice'
             , 'pcs'
             , 'boxes'
-            , ('order_type', 'order_state'), 'in_store', 'plan_in_time']}),
+            , ('order_type', 'order_state') , 'in_store' , 'plan_in_time']}) ,
 
-        (u'扩展信息', {'fields': ['sender'
+        (u'扩展信息' , {'fields': ['sender'
             , 'serial_number'
             , 'order_comment'
             , 'receiver'
             , 'operator'
-            , 'fact_in_time'],
-                   'classes': ['collapse']}),
+            , 'fact_in_time'] ,
+                    'classes': ['collapse']}) ,
     ]
 
+    def save_model(self , request , obj , form , change):
+        ts = int(time())
+        now = datetime.now()
+        nowstr = now.strftime('%Y%m%d%H%M%S')
+        obj.in_number = "in%s" % ts
+        obj.serial_number = "%s%s" % (obj.order_type , nowstr)
+        obj.operator = request.user
+        super(OrderInAdmin , self).save_model(request , obj , form , change)
 
-admin.site.register(OrderIn, OrderInAdmin)
+
+admin.site.register(OrderIn , OrderInAdmin)
 
 
 class OrderOutResource(resources.ModelResource):
@@ -244,41 +256,50 @@ class OrderOutAdmin(ImportExportModelAdmin):
         , 'order_comment'
         , 'operator'
         , 'order_state']
-    search_fields = ['in_number', 'customer__name', 'order_state', 'warehouse__ename', ]
+    search_fields = ['in_number' , 'customer__name' , 'order_state' , 'warehouse__ename' , ]
     list_filter = [
         # for ordinary fields
-        'customer__name',
-        'order_state',
-        'warehouse__ename',
-        'order_type',
-        'operate_date',
+        'customer__name' ,
+        'order_state' ,
+        'warehouse__ename' ,
+        'order_type' ,
+        'operate_date' ,
     ]
     inlines = [OrderOutProductshipInline]
     fieldsets = [
-        (None, {'fields': ['out_number'
+        (None , {'fields': ['out_number'
             , 'warehouse'
             , 'customer'
             , 'invoice'
             , 'pcs'
             , 'boxes'
-            , ('order_type', 'order_state')
+            , ('order_type' , 'order_state')
             , 'in_store'
-            , 'fact_out_time']}),
+            , 'fact_out_time']}) ,
 
-        (u'扩展信息', {'fields': ['serial_number'
-            , ('receiver', 'receiver_addr', 'receiver_phone')
-            , ('order_comment', 'operator')],
-                   'classes': ['collapse']}),
+        (u'扩展信息' , {'fields': ['serial_number'
+            , ('receiver' , 'receiver_addr' , 'receiver_phone')
+            , ('order_comment' , 'operator')] ,
+              'classes': ['collapse']}) ,
     ]
 
+    def save_model(self , request , obj , form , change):
+        ts = int(time())
+        now = datetime.now()
+        nowstr = now.strftime('%Y%m%d%H%M%S')
+        obj.in_number = "in%s" % ts
+        obj.serial_number = "%s%s" % (obj.order_type , nowstr)
+        obj.operator = request.user
+        super(OrderOutAdmin , self).save_model(request , obj , form , change)
 
-admin.site.register(OrderOut, OrderOutAdmin)
+
+admin.site.register(OrderOut , OrderOutAdmin)
 
 
 class LocationResource(resources.ModelResource):
     class Meta:
         model = Location
-        import_id_fields = ('order_id',)
+        import_id_fields = ('order_id' ,)
 
 
 class LocationAdmin(ImportExportModelAdmin):
@@ -307,10 +328,10 @@ class LocationAdmin(ImportExportModelAdmin):
         , 'name'
         , 'customer'
         , 'warehouse']
-    search_fields = ['location_id', 'state', 'type', 'category', 'name']
+    search_fields = ['location_id' , 'state' , 'type' , 'category' , 'name']
 
     fieldsets = [
-        (None, {'fields': ['location_id'
+        (None , {'fields': ['location_id'
             , 'state'
             , 'type'
             , 'category'
@@ -320,11 +341,11 @@ class LocationAdmin(ImportExportModelAdmin):
             , 'mixbatch'
             , 'repeate'
             , 'warehouse'
-            , 'customer']}),
+            , 'customer']}) ,
 
-        (u'扩展信息', dict(fields=[('x'
-                                , 'y'
-                                , 'z')
+        (u'扩展信息' , dict(fields=[('x'
+                                 , 'y'
+                                 , 'z')
             , 'valid_flag'
             , 'standcode'
             , 'up'
@@ -334,9 +355,8 @@ class LocationAdmin(ImportExportModelAdmin):
             , 'volume'
             , 'comment'
             , 'help_tag'
-            , 'name'], classes=['collapse'])),
+            , 'name'] , classes=['collapse'])) ,
     ]
 
 
-admin.site.register(Location, LocationAdmin)
-
+admin.site.register(Location , LocationAdmin)

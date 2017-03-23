@@ -34,7 +34,7 @@ class Customer(models.Model):
             super (Customer, self).save (*args, **kwargs)
             self.customer_id = 100000 + self.id
             super (Customer, self).save (*args, **kwargs)
-        super(Customer, self).save(*args, **kwargs)  # Call the "real" save() method.
+
 
 @python_2_unicode_compatible
 class Product(models.Model):
@@ -98,7 +98,7 @@ class Product(models.Model):
             super(Product, self).save(*args, **kwargs)
             self.product_id = 10000000 + self.id
             super(Product, self).save(*args, **kwargs)
-        super(Product, self).save(*args, **kwargs)
+
 
 @python_2_unicode_compatible
 class Warehouse(models.Model):
@@ -119,22 +119,21 @@ class Warehouse(models.Model):
     def __str__(self):
         return self.ename
 
-
 class CommonOrder(models.Model):
     order_type_choices = (
         (u'入库', (
-            ('1', u'正常入库'),
-            ('2', u'赠品入库'),
-            ('3', u'不良品入库'),
+            ('a', u'正常入库'),
+            ('b', u'不良品入库'),
+            ('c', u'赠品入库'),
         )
          ),
         (u'出库', (
-            ('4', u'正常出库'),
-            ('5', u'赠品出库'),
+            ('d', u'正常出库'),
+            ('e', u'赠品出库'),
         )
          ),
         (u'其他', (
-            ('6', u'未知'),
+            ('f', u'未知'),
         )
          ),
     )
@@ -168,7 +167,7 @@ class CommonOrder(models.Model):
 
 @python_2_unicode_compatible
 class OrderIn(CommonOrder):
-    in_number = models.CharField('入库编号', max_length=20)
+    in_number = models.CharField('入库编号', help_text=u'留空系统会自动生成', max_length=20, blank=True)
     sender = models.CharField('结算单位', max_length=30, blank=True, null=True)
     receiver = models.CharField('送货单位', max_length=30, blank=True, null=True)
     plan_in_time = models.DateField('计划入库日期', blank=True, null=True)
@@ -186,7 +185,7 @@ class OrderIn(CommonOrder):
 
 @python_2_unicode_compatible
 class OrderOut(CommonOrder):
-    out_number = models.CharField('出库编号', max_length=20)
+    out_number = models.CharField('出库编号', help_text=u'留空系统会自动生成', max_length=20)
     fact_out_time = models.DateField('出库日期', null=True, blank=True)
     receiver = models.CharField('收货人', max_length=10, blank=True, null=True)
     receiver_addr = models.CharField('送货地址', max_length=30, blank=True, null=True)

@@ -25,7 +25,7 @@ SECRET_KEY = 'yg8&8-xni)voev4seri!76krz6c3su!iq@*cujny-h__=$pm4+'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['ccwlsz.vicp.io']
+ALLOWED_HOSTS = ['ccwlsz.vicp.io',u'127.0.0.1']
 
 
 # Application definition
