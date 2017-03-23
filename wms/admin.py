@@ -287,7 +287,7 @@ class OrderOutAdmin(ImportExportModelAdmin):
         ts = int(time())
         now = datetime.now()
         nowstr = now.strftime('%Y%m%d%H%M%S')
-        obj.in_number = "in%s" % ts
+        obj.out_number = "out%s" % ts
         obj.serial_number = "%s%s" % (obj.order_type , nowstr)
         obj.operator = request.user
         super(OrderOutAdmin , self).save_model(request , obj , form , change)
