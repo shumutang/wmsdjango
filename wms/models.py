@@ -12,6 +12,7 @@ from django.utils.encoding import python_2_unicode_compatible
 
 @python_2_unicode_compatible
 class Customer(models.Model):
+    customer_id = models.IntegerField('客户编码',help_text=u'留空系统自动生成',blank=True)
     name = models.CharField('客户名称', max_length=60)
     address = models.CharField('地址', max_length=80)
     city = models.CharField('城市', max_length=20)
@@ -25,6 +26,15 @@ class Customer(models.Model):
 
     def __str__(self):
         return self.name
+
+
+    def save(self, *args, **kwargs):
+        if self.customer_id is None:
+            self.customer_id = -1
+            super (Customer, self).save (*args, **kwargs)
+            self.customer_id = 100000 + self.id
+            super (Customer, self).save (*args, **kwargs)
+        super(Customer, self).save(*args, **kwargs)  # Call the "real" save() method.
 
 @python_2_unicode_compatible
 class Product(models.Model):
@@ -46,7 +56,7 @@ class Product(models.Model):
         (u'Y', u'Y'),
         (u'N', u'N'),
       )
-    product_id = models.CharField('商品编码',max_length=16)
+    product_id = models.IntegerField('商品编码',help_text=u'留空系统会自动生成', blank=True)
     customer = models.ForeignKey(Customer, verbose_name='所属客户')
     name = models.CharField('中文名称', max_length=80)
     ename = models.CharField('英文名称', max_length=30, blank=True, null=True)
@@ -81,6 +91,14 @@ class Product(models.Model):
     def volume(self):
         return self.width * self.height * self.length
     volume.short_description = u'体积'
+
+    def save(self, *args, **kwargs):
+        if self.product_id is None:
+            self.product_id = -1
+            super(Product, self).save(*args, **kwargs)
+            self.product_id = 10000000 + self.id
+            super(Product, self).save(*args, **kwargs)
+        super(Product, self).save(*args, **kwargs)
 
 @python_2_unicode_compatible
 class Warehouse(models.Model):

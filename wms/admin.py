@@ -87,7 +87,7 @@ class CustomerResource(resources.ModelResource):
 
 class CustomerAdmin(ImportExportModelAdmin):
     resource_class = CustomerResource
-    list_display = ['name', 'address', 'city', 'tel', 'phone', 'email']
+    list_display = ['customer_id','name', 'address', 'city', 'tel', 'phone', 'email']
     search_fields = ['name', 'address', 'city', 'tel', 'phone', 'email']
     list_filter = [
         # for ordinary fields
