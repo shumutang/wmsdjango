@@ -111,7 +111,7 @@ class WarehouseResource(resources.ModelResource):
 
 class WarehouseAdmin(ImportExportModelAdmin):
     resource_class = WarehouseResource
-    list_display = ['name' , 'ename' , 'address' , 'type']
+    list_display = ['id', 'name' , 'ename' , 'address' , 'type']
     search_fields = ['name' , 'ename' , 'address' , 'type' , ]
 
 
@@ -230,9 +230,12 @@ class OrderInAdmin(ImportExportModelAdmin):
         ts = int(time())
         now = datetime.now()
         nowstr = now.strftime('%Y%m%d%H%M%S')
-        obj.in_number = "in%s" % ts
-        obj.serial_number = "%s%s" % (obj.order_type , nowstr)
-        obj.operator = request.user
+        if obj.in_number is None:
+            obj.in_number = "out%s" % ts
+        if obj.serial_number is None:
+            obj.serial_number = "%s%s" % (obj.order_type , nowstr)
+        if obj.operator is None:
+            obj.operator = request.user.username
         super(OrderInAdmin , self).save_model(request , obj , form , change)
 
 
@@ -287,9 +290,12 @@ class OrderOutAdmin(ImportExportModelAdmin):
         ts = int(time())
         now = datetime.now()
         nowstr = now.strftime('%Y%m%d%H%M%S')
-        obj.out_number = "out%s" % ts
-        obj.serial_number = "%s%s" % (obj.order_type , nowstr)
-        obj.operator = request.user
+        if obj.out_number is None:
+            obj.out_number = "out%s" % ts
+        if obj.serial_number is None:
+            obj.serial_number = "%s%s" % (obj.order_type , nowstr)
+        if obj.operator is None:
+            obj.operator = request.user.username
         super(OrderOutAdmin , self).save_model(request , obj , form , change)
 
 
@@ -299,7 +305,32 @@ admin.site.register(OrderOut , OrderOutAdmin)
 class LocationResource(resources.ModelResource):
     class Meta:
         model = Location
-        import_id_fields = ('order_id' ,)
+        fields = ['location_id'
+        , 'state'
+        , 'type'
+        , 'category'
+        , 'freeze_flag'
+        , 'area'
+        , 'mixstore'
+        , 'mixbatch'
+        , 'repeate'
+        , 'x'
+        , 'y'
+        , 'z'
+        , 'valid_flag'
+        , 'standcode'
+        , 'up'
+        , 'left'
+        , 'length'
+        , 'width'
+        , 'volume'
+        , 'comment'
+        , 'help_tag'
+        , 'name'
+        , 'customer'
+        , 'warehouse']
+
+        import_id_fields = ('location_id' ,)
 
 
 class LocationAdmin(ImportExportModelAdmin):
