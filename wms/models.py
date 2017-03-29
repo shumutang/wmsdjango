@@ -117,7 +117,7 @@ class Warehouse(models.Model):
         verbose_name_plural = u'仓库'
 
     def __str__(self):
-        return self.ename
+        return self.name
 
 class CommonOrder(models.Model):
     order_type_choices = (
@@ -171,8 +171,8 @@ class OrderIn(CommonOrder):
     sender = models.CharField('结算单位', max_length=30, blank=True, null=True)
     receiver = models.CharField('送货单位', max_length=30, blank=True, null=True)
     plan_in_time = models.DateField('计划入库日期', blank=True, null=True)
-    operator = models.CharField('制单人', max_length=60, null=True, blank=True)
     fact_in_time = models.DateField('实际入库日期', null=True, blank=True)
+    operator = models.CharField('制单人' , max_length=60 , null=True , blank=True)
     product = models.ManyToManyField(Product, verbose_name='商品名称', through='OrderInProductship')
 
     class Meta:
@@ -185,7 +185,7 @@ class OrderIn(CommonOrder):
 
 @python_2_unicode_compatible
 class OrderOut(CommonOrder):
-    out_number = models.CharField('出库编号', help_text=u'留空系统会自动生成', max_length=20)
+    out_number = models.CharField('出库编号', help_text=u'留空系统会自动生成', max_length=20,blank=True)
     fact_out_time = models.DateField('出库日期', null=True, blank=True)
     receiver = models.CharField('收货人', max_length=10, blank=True, null=True)
     receiver_addr = models.CharField('送货地址', max_length=30, blank=True, null=True)
