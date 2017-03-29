@@ -60,8 +60,8 @@ class Product(models.Model):
     customer = models.ForeignKey(Customer, verbose_name='所属客户')
     name = models.CharField('中文名称', max_length=80)
     ename = models.CharField('英文名称', max_length=30, blank=True, null=True)
-    help_name = models.CharField('助记码', max_length=75, blank=True)
-    batch_num = models.IntegerField('货物批号', default=100)
+    help_name = models.CharField('助记码', max_length=20, blank=True)
+    batch_num = models.CharField('货物批号', max_length=20, blank=True)
     type = models.CharField('型号', max_length=20, blank=True, null=True)
     categories = models.CharField('商品分类', max_length=20,choices=categories_choices,default='1')
     base_unit = models.CharField('基本单位', max_length=6,choices=base_unit_choices,default='1')
@@ -203,7 +203,7 @@ class OrderOut(CommonOrder):
 
 
 class OrderInProductship(models.Model):
-    orderin = models.ForeignKey(OrderIn,verbose_name='订单编号')
+    orderin = models.ForeignKey(OrderIn,verbose_name='入库编号')
     product = models.ForeignKey(Product, verbose_name='商品名称')
     orderin_pcs = models.IntegerField('入库数量', default=0)
 
@@ -213,7 +213,7 @@ class OrderInProductship(models.Model):
 
 
 class OrderOutProductship(models.Model):
-    orderout = models.ForeignKey(OrderOut)
+    orderout = models.ForeignKey(OrderOut, verbose_name='出库编号')
     product = models.ForeignKey(Product, verbose_name='商品名称')
     orderout_pcs = models.IntegerField('出库数量', default=0)
 

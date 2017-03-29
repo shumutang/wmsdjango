@@ -7,10 +7,8 @@ from django.contrib import admin
 # Register your models here.
 
 from import_export.admin import ImportExportModelAdmin
-
-# from django_admin_listfilter_dropdown.filters import DropdownFilter, RelatedDropdownFilter
-
 from import_export import resources
+
 from .models import Customer , Product , Location , Warehouse
 from .models import OrderInProductship , OrderOutProductship , OrderOut , OrderIn
 
@@ -21,7 +19,31 @@ from datetime import datetime
 class ProductResource(resources.ModelResource):
     class Meta:
         model = Product
-        import_id_fields = ('product_id' ,)
+        import_id_fields = ('barcode' ,)
+        fields = ['customer'
+            , 'name'
+            , 'ename'
+            , 'help_name'
+            , 'batch_num'
+            , 'type'
+            , 'categories'
+            , 'base_unit'
+            , 'pcs_perunit'
+            , 'Logistics_unit'
+            , 'pcs_Logistics'
+            , 'life_day'
+            , 'price'
+            , 'width'
+            , 'height'
+            , 'length'
+            , 'weight'
+            , 'net_weight'
+            , 'valid_flag'
+            , 'barcode'
+            , 'specs'
+            , 'brand'
+            , 'ordinal'
+                  ]
 
 
 class ProductAdmin(ImportExportModelAdmin):
@@ -65,17 +87,15 @@ class ProductAdmin(ImportExportModelAdmin):
             , 'ordinal'] ,
                     'classes': ['collapse']}) ,
     ]
-    search_fields = ['product_id' , 'customer' , 'help_name' , 'name' , 'ename' , 'batch_num' , 'type']
-    list_filter = [
-        # for ordinary fields
-        'name' ,
-        'ename' ,
-        'help_name' ,
-        'batch_num' ,
-        'categories' ,
-        'valid_flag' ,
-        'customer'
-    ]
+    search_fields = ['product_id'
+        , 'customer'
+        , 'help_name'
+        , 'name'
+        , 'ename'
+        , 'batch_num'
+        , 'type'
+        , 'barcode'
+        , 'categories']
 
 
 admin.site.register(Product , ProductAdmin)
@@ -111,7 +131,7 @@ class WarehouseResource(resources.ModelResource):
 
 class WarehouseAdmin(ImportExportModelAdmin):
     resource_class = WarehouseResource
-    list_display = ['id', 'name' , 'ename' , 'address' , 'type']
+    list_display = ['id' , 'name' , 'ename' , 'address' , 'type']
     search_fields = ['name' , 'ename' , 'address' , 'type' , ]
 
 
@@ -122,6 +142,7 @@ class OrderInProductshipResource(resources.ModelResource):
     class Meta:
         model = OrderInProductship
         # import_id_fields = ('orderin',)
+
 
 class OrderInProductshipAdmin(ImportExportModelAdmin):
     resource_class = OrderInProductshipResource
@@ -215,7 +236,7 @@ class OrderInAdmin(ImportExportModelAdmin):
             , 'invoice'
             , 'pcs'
             , 'boxes'
-            , ('order_type', 'order_state') , 'in_store' , 'plan_in_time']}) ,
+            , ('order_type' , 'order_state') , 'in_store' , 'plan_in_time']}) ,
 
         (u'扩展信息' , {'fields': ['sender'
             , 'serial_number'
@@ -283,7 +304,7 @@ class OrderOutAdmin(ImportExportModelAdmin):
         (u'扩展信息' , {'fields': ['serial_number'
             , ('receiver' , 'receiver_addr' , 'receiver_phone')
             , ('order_comment' , 'operator')] ,
-              'classes': ['collapse']}) ,
+                    'classes': ['collapse']}) ,
     ]
 
     def save_model(self , request , obj , form , change):
@@ -306,29 +327,29 @@ class LocationResource(resources.ModelResource):
     class Meta:
         model = Location
         fields = ['location_id'
-        , 'state'
-        , 'type'
-        , 'category'
-        , 'freeze_flag'
-        , 'area'
-        , 'mixstore'
-        , 'mixbatch'
-        , 'repeate'
-        , 'x'
-        , 'y'
-        , 'z'
-        , 'valid_flag'
-        , 'standcode'
-        , 'up'
-        , 'left'
-        , 'length'
-        , 'width'
-        , 'volume'
-        , 'comment'
-        , 'help_tag'
-        , 'name'
-        , 'customer'
-        , 'warehouse']
+            , 'state'
+            , 'type'
+            , 'category'
+            , 'freeze_flag'
+            , 'area'
+            , 'mixstore'
+            , 'mixbatch'
+            , 'repeate'
+            , 'x'
+            , 'y'
+            , 'z'
+            , 'valid_flag'
+            , 'standcode'
+            , 'up'
+            , 'left'
+            , 'length'
+            , 'width'
+            , 'volume'
+            , 'comment'
+            , 'help_tag'
+            , 'name'
+            , 'customer'
+            , 'warehouse']
 
         import_id_fields = ('location_id' ,)
 
