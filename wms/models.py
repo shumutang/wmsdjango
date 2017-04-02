@@ -12,7 +12,7 @@ from django.utils.encoding import python_2_unicode_compatible
 
 @python_2_unicode_compatible
 class Customer(models.Model):
-    customer_id = models.IntegerField('客户编码',help_text=u'留空系统自动生成',blank=True)
+    customer_id = models.IntegerField('客户编码',help_text=u'留空系统自动生成',unique=True, blank=True)
     name = models.CharField('客户名称', max_length=60)
     address = models.CharField('地址', max_length=80)
     city = models.CharField('城市', max_length=20)
@@ -34,6 +34,7 @@ class Customer(models.Model):
             super (Customer, self).save (*args, **kwargs)
             self.customer_id = 100000 + self.id
             super (Customer, self).save (*args, **kwargs)
+        super(Customer , self).save(*args , **kwargs)
 
 
 @python_2_unicode_compatible
@@ -56,7 +57,7 @@ class Product(models.Model):
         (u'Y', u'Y'),
         (u'N', u'N'),
       )
-    product_id = models.IntegerField('商品编码',help_text=u'留空系统会自动生成', blank=True)
+    product_id = models.IntegerField('商品编码',help_text=u'留空系统会自动生成', unique=True, blank=True)
     customer = models.ForeignKey(Customer, verbose_name='所属客户')
     name = models.CharField('中文名称', max_length=80)
     ename = models.CharField('英文名称', max_length=30, blank=True, null=True)
@@ -86,7 +87,7 @@ class Product(models.Model):
         verbose_name_plural = u'商品'
 
     def __str__(self):
-        return self.name
+        return "%s , %s , %s" % (self.name,self.ename,self.help_name)
 
     def volume(self):
         return self.width * self.height * self.length
@@ -98,6 +99,7 @@ class Product(models.Model):
             super(Product, self).save(*args, **kwargs)
             self.product_id = 10000000 + self.id
             super(Product, self).save(*args, **kwargs)
+        super(Product , self).save(*args , **kwargs)
 
 
 @python_2_unicode_compatible
@@ -107,6 +109,7 @@ class Warehouse(models.Model):
         (u'blp', u'不良品仓库'),
         (u'zp', u'赠品仓库'),
     )
+    wh_id = models.IntegerField('仓库编号',unique=True, help_text=u'留空系统会自动生成', blank=True)
     name = models.CharField('仓库名称', max_length=80)
     ename = models.CharField('仓库简码', max_length=4, blank=True, null=True)
     address = models.CharField('仓库地址', max_length=75, blank=True)
@@ -118,6 +121,14 @@ class Warehouse(models.Model):
 
     def __str__(self):
         return self.name
+
+    def save(self , *args , **kwargs):
+        if self.wh_id is None:
+            self.wh_id = -1
+            super(Warehouse , self).save(*args , **kwargs)
+            self.wh_id = 10000 + self.id
+            super(Warehouse , self).save(*args , **kwargs)
+        super(Warehouse , self).save(*args , **kwargs)
 
 class CommonOrder(models.Model):
     order_type_choices = (
@@ -133,7 +144,7 @@ class CommonOrder(models.Model):
         )
          ),
         (u'其他', (
-            ('f', u'未知'),
+            ('f', u'其他'),
         )
          ),
     )
@@ -185,7 +196,7 @@ class OrderIn(CommonOrder):
 
 @python_2_unicode_compatible
 class OrderOut(CommonOrder):
-    out_number = models.CharField('出库编号', help_text=u'留空系统会自动生成', max_length=20,blank=True)
+    out_number = models.CharField('出库编号', help_text=u'留空系统会自动生成', max_length=20, unique=True, blank=True)
     fact_out_time = models.DateField('出库日期', null=True, blank=True)
     receiver = models.CharField('收货人', max_length=10, blank=True, null=True)
     receiver_addr = models.CharField('送货地址', max_length=30, blank=True, null=True)

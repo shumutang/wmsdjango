@@ -49,6 +49,7 @@ class ProductResource(resources.ModelResource):
 class ProductAdmin(ImportExportModelAdmin):
     resource_class = ProductResource
     list_display = ['product_id'
+        , 'barcode'
         , 'name'
         , 'ename'
         , 'customer'
@@ -62,8 +63,7 @@ class ProductAdmin(ImportExportModelAdmin):
         , 'pcs_Logistics'
         , 'life_day'
         , 'price'
-        , 'width' , 'height' , 'length' , 'weight' , 'volume' , 'net_weight' , 'valid_flag' , 'barcode']
-
+        , 'width' , 'height' , 'length' , 'weight' , 'volume' , 'net_weight' , 'valid_flag' ]
     fieldsets = [
         (None , {'fields': ['product_id'
             , 'name'
@@ -96,8 +96,6 @@ class ProductAdmin(ImportExportModelAdmin):
         , 'type'
         , 'barcode'
         , 'categories']
-
-
 admin.site.register(Product , ProductAdmin)
 
 
@@ -107,19 +105,16 @@ class CustomerResource(resources.ModelResource):
         import_id_fields = ('name' ,)
         fields = ('name' , 'address' , 'city' , 'tel' , 'phone' , 'email')
 
-
 class CustomerAdmin(ImportExportModelAdmin):
     resource_class = CustomerResource
     list_display = ['customer_id' , 'name' , 'address' , 'city' , 'tel' , 'phone' , 'email']
     search_fields = ['name' , 'address' , 'city' , 'tel' , 'phone' , 'email']
     list_filter = [
-        # for ordinary fields
         'name' ,
         'address' ,
         'tel' ,
         'phone' ,
     ]
-
 
 admin.site.register(Customer , CustomerAdmin)
 
@@ -128,13 +123,10 @@ class WarehouseResource(resources.ModelResource):
     class Meta:
         model = Warehouse
 
-
 class WarehouseAdmin(ImportExportModelAdmin):
     resource_class = WarehouseResource
-    list_display = ['id' , 'name' , 'ename' , 'address' , 'type']
-    search_fields = ['name' , 'ename' , 'address' , 'type' , ]
-
-
+    list_display = ['wh_id' , 'name' , 'ename' , 'address' , 'type']
+    search_fields = ['wh_id' , 'name' , 'ename' , 'address' , 'type' , ]
 admin.site.register(Warehouse , WarehouseAdmin)
 
 
@@ -152,8 +144,6 @@ class OrderInProductshipAdmin(ImportExportModelAdmin):
         return obj.product.barcode
 
     barcode.short_description = (u"条形码")
-
-
 admin.site.register(OrderInProductship , OrderInProductshipAdmin)
 
 
@@ -171,8 +161,6 @@ class OrderOutProductshipAdmin(ImportExportModelAdmin):
         return obj.product.barcode
 
     barcode.short_description = (u"条形码")
-
-
 admin.site.register(OrderOutProductship , OrderOutProductshipAdmin)
 
 
@@ -209,25 +197,18 @@ class OrderInAdmin(ImportExportModelAdmin):
     list_display = ['in_number'
         , 'customer'
         , 'pcs'
+        , 'boxes'
         , 'warehouse'
         , 'order_type'
         , 'order_comment'
-        , 'operator'
+        , 'receiver'
         , 'order_state'
         , 'in_store'
         , 'plan_in_time'
-        , 'serial_number']
+        , 'fact_in_time'
+        , 'serial_number'
+        , 'operator' ]
     search_fields = ['in_number' , 'customer__name' , 'in_store' , 'order_state' , 'product__name']
-    list_filter = [
-        # for ordinary fields
-        'customer__name' ,
-        'order_state' ,
-        'in_store' ,
-        'warehouse__name' ,
-        'order_type' ,
-        'operate_date' ,
-        'product' ,
-    ]
     inlines = [OrderInProductshipInline]
     fieldsets = [
         (None , {'fields': ['in_number'
@@ -248,18 +229,14 @@ class OrderInAdmin(ImportExportModelAdmin):
     ]
 
     def save_model(self , request , obj , form , change):
-        ts = int(time())
-        now = datetime.now()
-        nowstr = now.strftime('%Y%m%d%H%M%S')
-        if obj.in_number is None:
-            obj.in_number = "out%s" % ts
-        if obj.serial_number is None:
+        if not change:
+            ts = int(time())
+            now = datetime.now()
+            nowstr = now.strftime('%Y%m%d%H%M%S')
+            obj.in_number = "in%s" % ts
             obj.serial_number = "%s%s" % (obj.order_type , nowstr)
-        if obj.operator is None:
             obj.operator = request.user.username
         super(OrderInAdmin , self).save_model(request , obj , form , change)
-
-
 admin.site.register(OrderIn , OrderInAdmin)
 
 
@@ -279,16 +256,11 @@ class OrderOutAdmin(ImportExportModelAdmin):
         , 'order_type'
         , 'order_comment'
         , 'operator'
-        , 'order_state']
+        , 'order_state'
+        , 'fact_out_time'
+        , 'serial_number'
+        , 'operator']
     search_fields = ['in_number' , 'customer__name' , 'order_state' , 'warehouse__ename' , ]
-    list_filter = [
-        # for ordinary fields
-        'customer__name' ,
-        'order_state' ,
-        'warehouse__ename' ,
-        'order_type' ,
-        'operate_date' ,
-    ]
     inlines = [OrderOutProductshipInline]
     fieldsets = [
         (None , {'fields': ['out_number'
@@ -308,17 +280,14 @@ class OrderOutAdmin(ImportExportModelAdmin):
     ]
 
     def save_model(self , request , obj , form , change):
-        ts = int(time())
-        now = datetime.now()
-        nowstr = now.strftime('%Y%m%d%H%M%S')
-        if obj.out_number is None:
+        if not change:
+            ts = int(time())
+            now = datetime.now()
+            nowstr = now.strftime('%Y%m%d%H%M%S')
             obj.out_number = "out%s" % ts
-        if obj.serial_number is None:
             obj.serial_number = "%s%s" % (obj.order_type , nowstr)
-        if obj.operator is None:
             obj.operator = request.user.username
         super(OrderOutAdmin , self).save_model(request , obj , form , change)
-
 
 admin.site.register(OrderOut , OrderOutAdmin)
 
