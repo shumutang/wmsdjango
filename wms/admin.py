@@ -48,6 +48,7 @@ class ProductResource(resources.ModelResource):
 
 class ProductAdmin(ImportExportModelAdmin):
     resource_class = ProductResource
+    list_per_page = 20
     list_display = ['product_id'
         , 'barcode'
         , 'name'
@@ -109,12 +110,6 @@ class CustomerAdmin(ImportExportModelAdmin):
     resource_class = CustomerResource
     list_display = ['customer_id' , 'name' , 'address' , 'city' , 'tel' , 'phone' , 'email']
     search_fields = ['name' , 'address' , 'city' , 'tel' , 'phone' , 'email']
-    list_filter = [
-        'name' ,
-        'address' ,
-        'tel' ,
-        'phone' ,
-    ]
 
 admin.site.register(Customer , CustomerAdmin)
 
@@ -133,34 +128,42 @@ admin.site.register(Warehouse , WarehouseAdmin)
 class OrderInProductshipResource(resources.ModelResource):
     class Meta:
         model = OrderInProductship
-        # import_id_fields = ('orderin',)
-
+        import_id_fields = ('orderin__in_number' ,'product__barcode',)
+        fields = ('orderin__in_number' , 'product__barcode', 'orderin_pcs')
 
 class OrderInProductshipAdmin(ImportExportModelAdmin):
     resource_class = OrderInProductshipResource
-    list_display = ['orderin' , 'product' , 'barcode' , 'orderin_pcs' , ]
+    list_per_page = 20
+    list_display = ['orderin' ,'productid', 'product' ,'barcode' , 'orderin_pcs' , ]
+    search_fields = ['orderin' , 'productid' , 'product' , 'barcode' , ]
 
     def barcode(self , obj):
         return obj.product.barcode
+    barcode.short_description = u"条形码"
 
-    barcode.short_description = (u"条形码")
+    def productid(self , obj):
+        return obj.product.product_id
+    productid.short_description = u'商品编码'
+
+
 admin.site.register(OrderInProductship , OrderInProductshipAdmin)
 
 
 class OrderOutProductshipResource(resources.ModelResource):
     class Meta:
         model = OrderOutProductship
-        # import_id_fields = ('orderin',)
-
+        import_id_fields = ('orderout',)
+        fields = ('orderout' , 'barcode' , 'orderout_pcs')
 
 class OrderOutProductshipAdmin(ImportExportModelAdmin):
     resource_class = OrderOutProductshipResource
+    list_per_page = 20
     list_display = ['orderout' , 'product' , 'barcode' , 'orderout_pcs' , ]
 
     def barcode(self , obj):
         return obj.product.barcode
-
     barcode.short_description = (u"条形码")
+
 admin.site.register(OrderOutProductship , OrderOutProductshipAdmin)
 
 
