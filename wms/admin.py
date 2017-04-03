@@ -134,8 +134,14 @@ class OrderInProductshipResource(resources.ModelResource):
 class OrderInProductshipAdmin(ImportExportModelAdmin):
     resource_class = OrderInProductshipResource
     list_per_page = 20
-    list_display = ['orderin' ,'productid', 'product' ,'barcode' , 'orderin_pcs' , ]
-    search_fields = ['orderin' , 'productid' , 'product' , 'barcode' , ]
+    list_display = ['orderin'
+            , 'productid'
+            , 'product'
+            , 'specs'
+            , 'barcode'
+            , 'orderin_pcs'
+            , 'fact_intime' ]
+    search_fields = ['orderin__in_number','product__product_id','product__barcode', 'product__specs' ]
 
     def barcode(self , obj):
         return obj.product.barcode
@@ -145,6 +151,13 @@ class OrderInProductshipAdmin(ImportExportModelAdmin):
         return obj.product.product_id
     productid.short_description = u'商品编码'
 
+    def specs(self , obj):
+        return obj.product.specs
+    specs.short_description = u'规格'
+
+    def fact_intime(self , obj):
+        return obj.orderin.fact_in_time
+    fact_intime.short_description = u'实际入库时间'
 
 admin.site.register(OrderInProductship , OrderInProductshipAdmin)
 
@@ -168,14 +181,24 @@ admin.site.register(OrderOutProductship , OrderOutProductshipAdmin)
 
 
 class OrderInProductshipInline(admin.TabularInline):
+    """
     fieldsets = (('' , {
         'fields': (
             'product' ,
+            'barcode' ,
             'orderin_pcs' ,
         )
     }) ,)
+    """
+    fields = ['product', 'orderin_pcs']
+
+    def barcode(self , obj):
+        return obj.product.barcode
+    barcode.short_description = (u"条形码")
+
     model = OrderInProductship
     extra = 5
+    fk_name = 'orderin'
 
 
 class OrderOutProductshipInline(admin.TabularInline):
@@ -209,7 +232,6 @@ class OrderInAdmin(ImportExportModelAdmin):
         , 'in_store'
         , 'plan_in_time'
         , 'fact_in_time'
-        , 'serial_number'
         , 'operator' ]
     search_fields = ['in_number' , 'customer__name' , 'in_store' , 'order_state' , 'product__name']
     inlines = [OrderInProductshipInline]
@@ -218,16 +240,18 @@ class OrderInAdmin(ImportExportModelAdmin):
             , 'warehouse'
             , 'customer'
             , 'invoice'
+            , ('order_type' , 'order_state')
+            , 'in_store'
+            , 'plan_in_time'
+            , 'fact_in_time'
+            , 'order_comment']}) ,
+
+        (u'扩展信息' , {'fields': ['serial_number'
+            , 'sender'
             , 'pcs'
             , 'boxes'
-            , ('order_type' , 'order_state') , 'in_store' , 'plan_in_time']}) ,
-
-        (u'扩展信息' , {'fields': ['sender'
-            , 'serial_number'
-            , 'order_comment'
             , 'receiver'
-            , 'operator'
-            , 'fact_in_time'] ,
+            , 'operator'] ,
                     'classes': ['collapse']}) ,
     ]
 
@@ -270,15 +294,17 @@ class OrderOutAdmin(ImportExportModelAdmin):
             , 'warehouse'
             , 'customer'
             , 'invoice'
-            , 'pcs'
-            , 'boxes'
             , ('order_type' , 'order_state')
             , 'in_store'
-            , 'fact_out_time']}) ,
+            , 'fact_out_time'
+            , 'order_comment'
+            , ]}) ,
 
         (u'扩展信息' , {'fields': ['serial_number'
+            , 'pcs'
+            , 'boxes'
             , ('receiver' , 'receiver_addr' , 'receiver_phone')
-            , ('order_comment' , 'operator')] ,
+            , 'operator'] ,
                     'classes': ['collapse']}) ,
     ]
 
@@ -381,6 +407,5 @@ class LocationAdmin(ImportExportModelAdmin):
             , 'help_tag'
             , 'name'] , classes=['collapse'])) ,
     ]
-
 
 admin.site.register(Location , LocationAdmin)
