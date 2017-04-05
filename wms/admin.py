@@ -44,7 +44,8 @@ class ProductResource(resources.ModelResource):
 class ProductAdmin(ImportExportModelAdmin):
     resource_class = ProductResource
     list_per_page = 20
-    list_display = ['product_id'
+    list_display = ['id'
+        , 'product_id'
         , 'barcode'
         , 'name'
         , 'ename'
@@ -60,6 +61,7 @@ class ProductAdmin(ImportExportModelAdmin):
         , 'life_day'
         , 'price'
         , 'width' , 'height' , 'length' , 'weight' , 'volume' , 'net_weight' , 'valid_flag' ]
+    list_display_links = ['product_id']
     fieldsets = [
         (None , {'fields': ['product_id'
             , 'name'

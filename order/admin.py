@@ -58,12 +58,13 @@ class OrderOutProductshipInline(admin.TabularInline):
 class OrderInResource(resources.ModelResource):
     class Meta:
         model = OrderIn
-        fields = ('in_number' , 'customer' , 'pcs' , 'warehouse' , 'plan_in_time')
+        fields = ('in_number' , 'customer' , 'warehouse' , 'plan_in_time')
 
 
 class OrderInAdmin(ImportExportModelAdmin):
     resource_class = OrderInResource
-    list_display = ['in_number'
+    list_display = ['id'
+        , 'in_number'
         , 'customer'
         , 'warehouse'
         , 'order_type'
@@ -76,6 +77,7 @@ class OrderInAdmin(ImportExportModelAdmin):
         , 'operator'
         , 'operate_date']
     search_fields = ['in_number' , 'customer__name' , 'in_store' , 'order_state' , 'product__name']
+    list_display_links = ['in_number']
     inlines = [OrderInProductshipInline]
     fieldsets = [
         (None , {'fields': ['in_number'
@@ -113,8 +115,6 @@ admin.site.register(OrderIn , OrderInAdmin)
 class OrderOutResource(resources.ModelResource):
     class Meta:
         model = OrderOut
-        # import_id_fields = ('order_id',)
-
 
 class OrderOutAdmin(ImportExportModelAdmin):
     resource_class = OrderOutResource
@@ -164,19 +164,16 @@ class OrderOutAdmin(ImportExportModelAdmin):
 admin.site.register(OrderOut , OrderOutAdmin)
 
 
-
 class OrderInProductshipResource(resources.ModelResource):
     class Meta:
         model = OrderInProductship
-        import_id_fields = ('orderin__in_number' ,'product__barcode',)
-        fields = ('orderin__in_number' , 'product__barcode', 'orderin_pcs')
-
 
 class OrderInProductshipAdmin(ImportExportModelAdmin):
     resource_class = OrderInProductshipResource
     list_per_page = 20
-    list_display = ['orderin'
-            , 'productid'
+    list_display = ['id'
+            , 'orderin'
+            , 'productcode'
             , 'product'
             , 'specs'
             , 'barcode'
@@ -193,13 +190,21 @@ class OrderInProductshipAdmin(ImportExportModelAdmin):
     view_on_site = False
     list_display_links = None
 
+    def orderinid(self, obj):
+        return obj.orderin.id
+    orderinid.short_description = u"订单id"
+
+    def productid(self, obj):
+        return obj.product.id
+    productid.short_description = u"商品id"
+
     def barcode(self , obj):
         return obj.product.barcode
     barcode.short_description = u"条形码"
 
-    def productid(self , obj):
+    def productcode(self , obj):
         return obj.product.product_id
-    productid.short_description = u'商品编码'
+    productcode.short_description = u'商品编码'
 
     def specs(self , obj):
         return obj.product.specs
@@ -227,14 +232,12 @@ admin.site.register(OrderInProductship , OrderInProductshipAdmin)
 class OrderOutProductshipResource(resources.ModelResource):
     class Meta:
         model = OrderOutProductship
-        import_id_fields = ('orderout',)
-        fields = ('orderout' , 'barcode' , 'orderout_pcs')
 
 class OrderOutProductshipAdmin(ImportExportModelAdmin):
     resource_class = OrderOutProductshipResource
     list_per_page = 20
     list_display = ['orderout'
-        , 'productid'
+        , 'productcode'
         , 'product'
         , 'specs'
         , 'barcode'
@@ -253,9 +256,9 @@ class OrderOutProductshipAdmin(ImportExportModelAdmin):
         return obj.product.barcode
     barcode.short_description = u"条形码"
 
-    def productid(self, obj):
+    def productcode(self, obj):
         return obj.product.product_id
-    productid.short_description = u'商品编码'
+    productcode.short_description = u'商品编码'
 
     def specs(self, obj):
         return obj.product.specs
