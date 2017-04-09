@@ -123,6 +123,20 @@ class OrderInAdmin(ImportExportModelAdmin):
     ]
     # radio_fields = {"in_store": admin.HORIZONTAL}
     radio_fields = {"in_store": admin.VERTICAL}
+    actions = ['make_instore']
+
+    def make_instore(self, request, queryset):
+        for order in queryset:
+            if order.in_store == 'n':
+                order.in_store = 'y'
+                order.save()
+                msg = u'订单(%s) 完成入库确认' % order.in_number
+            elif order.in_store == 'y':
+                msg = u'订单(%s) 已入库完成，不需重复确认入库' % order.in_number
+            else:
+                msg = u'订单(%s) 确认入库异常' % order.in_number
+            self.message_user(request, msg)
+    make_instore.short_description = u"确认入库"
 
     def save_model(self, request, obj, form, change):
         if change:
@@ -215,6 +229,20 @@ class OrderOutAdmin(ImportExportModelAdmin):
                    'classes': ['collapse']}),
     ]
     radio_fields = {"out_store": admin.VERTICAL}
+    actions = ['make_outstore']
+
+    def make_outstore(self, request, queryset):
+        for order in queryset:
+            if order.out_store == 'n':
+                order.out_store = 'y'
+                order.save()
+                msg = u'订单(%s) 完成出库确认' % order.out_number
+            elif order.out_store == 'y':
+                msg = u'订单(%s) 已出库完成，不需重复确认出库' % order.out_number
+            else:
+                msg = u'订单(%s) 确认出库异常' % order.out_number
+            self.message_user(request, msg)
+    make_outstore.short_description = u"确认出库"
 
     def save_model(self, request, obj, form, change):
         if change:
