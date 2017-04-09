@@ -56,10 +56,11 @@ class Product(models.Model):
         (u'Y', u'Y'),
         (u'N', u'N'),
       )
+    barcode = models.BigIntegerField('条形码', primary_key=True,)
     product_id = models.IntegerField('商品编码',help_text=u'留空系统会自动生成', unique=True, blank=True)
     customer = models.ForeignKey(Customer, verbose_name='所属客户')
-    name = models.CharField('中文名称', max_length=80)
-    ename = models.CharField('英文名称', max_length=30, blank=True, null=True)
+    name = models.CharField('中文名称', max_length=40)
+    ename = models.CharField('英文名称', max_length=20, blank=True, null=True)
     help_name = models.CharField('助记码', max_length=20, blank=True)
     batch_num = models.CharField('货物批号', max_length=20, blank=True)
     type = models.CharField('型号', max_length=20, blank=True, null=True)
@@ -76,7 +77,6 @@ class Product(models.Model):
     weight = models.IntegerField('重量(KG)', default=0)
     net_weight = models.IntegerField('净重(KG)', default=0)
     valid_flag = models.CharField('有效标志', max_length=6, default='Y')
-    barcode = models.CharField('条形码', max_length=20)
     specs = models.CharField('规格', max_length=60, blank=True, null=True)
     brand = models.CharField('品牌', max_length=20, blank=True, null=True)
     ordinal = models.IntegerField('序号', blank=True, null=True, default=0)
@@ -86,7 +86,7 @@ class Product(models.Model):
         verbose_name_plural = u'商品'
 
     def __str__(self):
-        return "%s , %s , %s" % (self.name,self.ename,self.help_name)
+        return "%s , %s , %s" % (self.name, self.ename, self.help_name)
 
     def volume(self):
         return self.width * self.height * self.length
@@ -96,9 +96,9 @@ class Product(models.Model):
         if self.product_id is None:
             self.product_id = -1
             super(Product, self).save(*args, **kwargs)
-            self.product_id = 10000000 + self.id
+            self.product_id = 10000000 + Product.objects.count()
             super(Product, self).save(*args, **kwargs)
-        super(Product , self).save(*args , **kwargs)
+        super(Product, self).save(*args, **kwargs)
 
 
 @python_2_unicode_compatible

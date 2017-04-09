@@ -8,6 +8,8 @@ from django.utils.encoding import python_2_unicode_compatible
 from django.utils import timezone
 from datetime import date
 
+from django.core.exceptions import ValidationError
+
 from wms.models import Customer , Product , Location , Warehouse
 
 # Create your models here.
@@ -35,33 +37,35 @@ class OrderIn(CommonOrder):
             ('qt', u'其他'),
     )
 
-    order_state_choices = (
-        (u'1', u'接单'),
-        (u'2', u'已入库'),
-    )
-
     in_store_choices = (
         (u'y', u'已完成'),
         (u'n', u'未完成'),
     )
-    in_number = models.CharField('入库编号', help_text=u'留空系统会自动生成', max_length=20, blank=True)
+    in_number = models.CharField('入库编号',primary_key=True, help_text=u'留空系统会自动生成', max_length=20, blank=True)
     sender = models.CharField('结算单位', max_length=30, blank=True, null=True)
     receiver = models.CharField('送货单位', max_length=30, blank=True, null=True)
     plan_in_time = models.DateField('计划入库日期', default=date.today)
     fact_in_time = models.DateField('实际入库日期', default=date.today)
-    operator = models.CharField('制单人' , max_length=60 , null=True , blank=True)
+    operator = models.CharField('制单人', max_length=60 , null=True , blank=True)
     in_store = models.CharField('入库', max_length=4, choices=in_store_choices, default='n')
     order_type = models.CharField('订单类型', max_length=10, choices=order_type_choices, default='zc')
-    order_state = models.CharField('订单状态', max_length=10, choices=order_state_choices,default='1')
     product = models.ManyToManyField(Product, verbose_name='商品名称', through='OrderInProductship')
 
     class Meta:
         verbose_name = u'订单(入库)'
         verbose_name_plural = u'订单(入库)'
-        ordering = ['plan_in_time']
+        ordering = ['-in_number']
 
     def __str__(self):
         return self.in_number
+
+    # def save(self, *args, **kwargs):
+    #     if self.in_store == "y":
+    #         Msg = u'Order(%s) is completed,do not modified.' % self.in_number
+    #         raise ValidationError(Msg)
+    #     else:
+    #         super(OrderIn, self).save(*args, **kwargs)
+
 
 @python_2_unicode_compatible
 class OrderOut(CommonOrder):
@@ -72,17 +76,12 @@ class OrderOut(CommonOrder):
             ('qt', u'其他'),
     )
 
-    order_state_choices = (
-        (u'1', u'接单'),
-        (u'2', u'已出库'),
-    )
-
     out_store_choices = (
-        (u'1', u'已完成'),
-        (u'2', u'未完成'),
+        (u'y', u'已完成'),
+        (u'n', u'未完成'),
     )
 
-    out_number = models.CharField('出库编号', help_text=u'留空系统会自动生成', max_length=20, unique=True, blank=True)
+    out_number = models.CharField('出库编号', primary_key=True, help_text=u'留空系统会自动生成', max_length=20, blank=True)
     fact_out_time = models.DateField('出库日期', default=date.today)
     receiver = models.CharField('收货人', max_length=10, blank=True, null=True)
     receiver_addr = models.CharField('送货地址', max_length=30, blank=True, null=True)
@@ -90,34 +89,72 @@ class OrderOut(CommonOrder):
     operator = models.CharField('出库人', max_length=60, null=True, blank=True)
     out_store = models.CharField('出库', max_length=4, choices=out_store_choices,default='n')
     order_type = models.CharField('订单类型', max_length=10, choices=order_type_choices, default='zc')
-    order_state = models.CharField('订单状态', max_length=10, choices=order_state_choices, default='1')
     product = models.ManyToManyField(Product, verbose_name='商品名称', through='OrderOutProductship')
 
     class Meta:
         verbose_name = u'订单(出库)'
         verbose_name_plural = u'订单(出库)'
-        ordering = ['fact_out_time']
+        ordering = ['-out_number']
 
     def __str__(self):
         return self.out_number
 
+    # def save(self, *args, **kwargs):
+    #     if self.out_store == "y":
+    #         Msg = u'Order(%s) is completed,do not modified.' % self.out_number
+    #         raise ValidationError(Msg)
+    #     else:
+    #         super(OrderOut, self).save(*args, **kwargs)
+
 
 class OrderInProductship(models.Model):
-    orderin = models.ForeignKey(OrderIn,verbose_name='入库编号')
-    product = models.ForeignKey(Product, verbose_name='商品名称')
+    orderin = models.ForeignKey(
+        OrderIn,
+        verbose_name='入库编号',
+        on_delete=models.CASCADE
+    )
+    product = models.ForeignKey(
+        Product,
+        verbose_name='商品名称',
+        on_delete=models.CASCADE,
+        parent_link=True
+    )
     orderin_pcs = models.IntegerField('入库数量', default=0)
+
+    def save(self, *args, **kwargs):
+        if self.orderin.in_store == "y":
+            Msg = u'Order(%s) is completed,do not modified.' % self.orderin.in_number
+            raise ValidationError(Msg)
+        else:
+            super(OrderInProductship, self).save(*args, **kwargs)
 
     class Meta:
         verbose_name = u'入库订单-商品明细'
         verbose_name_plural = u'入库订单-商品明细'
-
+        ordering = ['-id']
 
 class OrderOutProductship(models.Model):
-    orderout = models.ForeignKey(OrderOut, verbose_name='出库编号')
-    product = models.ForeignKey(Product, verbose_name='商品名称')
+    orderout = models.ForeignKey(
+        OrderOut,
+        verbose_name='出库编号',
+        on_delete=models.CASCADE
+    )
+    product = models.ForeignKey(
+        Product,
+        verbose_name='商品名称',
+        on_delete=models.CASCADE
+    )
     orderout_pcs = models.IntegerField('出库数量', default=0)
+
+    def save(self, *args, **kwargs):
+        if self.orderout.out_store == "y":
+            Msg = u'Order(%s) is completed,do not modified.' % self.orderout.out_number
+            raise ValidationError(Msg)
+        else:
+            super(OrderOutProductship, self).save(*args, **kwargs)
 
     class Meta:
         verbose_name = u'出库订单-商品明细'
         verbose_name_plural = u'出库订单-商品明细'
+        ordering = ['-id']
 

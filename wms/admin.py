@@ -44,9 +44,8 @@ class ProductResource(resources.ModelResource):
 class ProductAdmin(ImportExportModelAdmin):
     resource_class = ProductResource
     list_per_page = 20
-    list_display = ['id'
+    list_display = ['barcode'
         , 'product_id'
-        , 'barcode'
         , 'name'
         , 'ename'
         , 'customer'
@@ -61,15 +60,16 @@ class ProductAdmin(ImportExportModelAdmin):
         , 'life_day'
         , 'price'
         , 'width' , 'height' , 'length' , 'weight' , 'volume' , 'net_weight' , 'valid_flag' ]
-    list_display_links = ['product_id']
+    list_display_links = ['barcode']
     fieldsets = [
-        (None , {'fields': ['product_id'
+        (None , {'fields': ['barcode'
+            , 'product_id'
             , 'name'
             , 'ename'
             , 'customer'
             , 'help_name'
             , 'pcs_Logistics'
-            , 'batch_num' , 'type' , 'categories' , 'base_unit' , 'pcs_perunit' , 'barcode' , ]}) ,
+            , 'batch_num' , 'type' , 'categories' , 'base_unit' , 'pcs_perunit' ,]}) ,
 
         (u'包装信息' , {'fields': ['life_day'
             , 'price'
@@ -90,6 +90,7 @@ class ProductAdmin(ImportExportModelAdmin):
         , 'name'
         , 'ename'
         , 'batch_num'
+        , 'customer__name'
         , 'type'
         , 'barcode'
         , 'categories']
