@@ -63,12 +63,12 @@ class OrderOutProductshipInline(admin.TabularInline):
     specs.short_description = u'规格'
 
     def store(self, obj):
-        product_id = obj.product.id
+        barcode = obj.product.barcode
         instore = OrderInProductship.objects.filter(
-            product=product_id
+            product=barcode
             , orderin__in_store='y').aggregate(Sum('orderin_pcs'))
         outstore = OrderOutProductship.objects.filter(
-            product=product_id
+            product=barcode
             , orderout__out_store='y').aggregate(Sum('orderout_pcs'))
         instore_pcs = 0 if instore['orderin_pcs__sum'] == None else instore['orderin_pcs__sum']
         outstore_pcs = 0 if outstore['orderout_pcs__sum'] == None else outstore['orderout_pcs__sum']
