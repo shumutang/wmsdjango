@@ -3,6 +3,10 @@
 from __future__ import unicode_literals
 
 from django.contrib import admin
+from django import forms
+from django.forms import ModelForm
+from django.contrib.admin.widgets import ForeignKeyRawIdWidget
+from django.contrib.admin.widgets import ManyToManyRawIdWidget
 
 from django.db.models import Count, Sum
 
@@ -18,6 +22,17 @@ from .models import OrderInProductship, OrderOutProductship, OrderOut, OrderIn
 
 admin.site.disable_action('delete_selected')
 
+
+class OrderInProductshipForm(forms.ModelForm):
+    class Meta:
+        model = OrderInProductship
+        fields = '__all__'
+        widgets = {
+            'product': ForeignKeyRawIdWidget(OrderInProductship._meta.get_field("product").rel,
+                                             admin.site,
+                                             attrs={'size': '40'}),
+            'orderin_pcs': forms.TextInput(attrs={'size': '10'}),
+        }
 
 class OrderInProductshipInline(admin.TabularInline):
     fields = ['product', 'barcode', 'specs', 'productid', 'orderin_pcs', ]
@@ -41,7 +56,8 @@ class OrderInProductshipInline(admin.TabularInline):
     model = OrderInProductship
     extra = 5
     fk_name = 'orderin'
-    raw_id_fields = ['product']
+    #raw_id_fields = ['product']
+    form = OrderInProductshipForm
 
 class OrderOutProductshipInline(admin.TabularInline):
     fields = ['product', 'barcode', 'specs', 'productid', 'store', 'orderout_pcs', ]
@@ -88,6 +104,7 @@ class OrderInResource(resources.ModelResource):
 
 class OrderInAdmin(ImportExportModelAdmin):
     resource_class = OrderInResource
+    readonly_fields = ['in_store', ]
     list_display = ['in_number'
         , 'customer'
         , 'warehouse'
@@ -121,9 +138,11 @@ class OrderInAdmin(ImportExportModelAdmin):
             , 'operator'],
                    'classes': ['collapse']}),
     ]
+
     # radio_fields = {"in_store": admin.HORIZONTAL}
-    radio_fields = {"in_store": admin.VERTICAL}
+    # radio_fields = {"in_store": admin.VERTICAL}
     actions = ['make_instore']
+
 
     def make_instore(self, request, queryset):
         for order in queryset:
@@ -197,6 +216,7 @@ class OrderOutResource(resources.ModelResource):
 
 class OrderOutAdmin(ImportExportModelAdmin):
     resource_class = OrderOutResource
+    readonly_fields = ['out_store', ]
     list_display = ['out_number'
         , 'customer'
         , 'warehouse'
@@ -302,8 +322,7 @@ class OrderInProductshipResource(resources.ModelResource):
     class Meta:
         model = OrderInProductship
 
-
-class OrderInProductshipAdmin(ImportExportModelAdmin):
+class OrderInProductshipAdmin(admin.ModelAdmin):
     resource_class = OrderInProductshipResource
     list_per_page = 20
     list_display = ['id'
@@ -327,9 +346,8 @@ class OrderInProductshipAdmin(ImportExportModelAdmin):
         , 'orderin__operate_date'
         , 'orderin__fact_in_time'
     ]
-    readonly_fields = ['orderin', 'product', 'orderin_pcs']
     actions = None
-    raw_id_fields = ['product']
+    # raw_id_fields = ['product']
     view_on_site = False
     list_display_links = ['id','barcode',]
 
@@ -442,9 +460,8 @@ class OrderOutProductshipAdmin(ImportExportModelAdmin):
         , 'orderout__operate_date'
         , 'orderout__fact_out_time'
     ]
-    readonly_fields = ['orderout', 'product', 'orderout_pcs']
     actions = None
-    raw_id_fields = ['product']
+    # raw_id_fields = ['product']
     view_on_site = False
     list_display_links = ['id', 'barcode', 'outnumber']
 
@@ -505,8 +522,6 @@ class OrderOutProductshipAdmin(ImportExportModelAdmin):
 
     def response_change(self, request, obj):
         if obj.orderout.out_store == 'y':
-            Msg = u'已完成订单，不能被删除'
-            # messages.add_message(request, messages.ERROR, Msg)
             return self.response_post_save_change(request, obj)
         else:
             super(OrderOutProductshipAdmin, self).response_change(request, obj)
