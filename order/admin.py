@@ -14,6 +14,7 @@ from time import time
 from datetime import datetime
 
 from django.urls import reverse
+from django.shortcuts import render
 
 from import_export.admin import ImportExportModelAdmin
 from import_export import resources
@@ -141,7 +142,7 @@ class OrderInAdmin(ImportExportModelAdmin):
 
     # radio_fields = {"in_store": admin.HORIZONTAL}
     # radio_fields = {"in_store": admin.VERTICAL}
-    actions = ['make_instore']
+    actions = ['make_instore', 'print_instore_detail']
 
 
     def make_instore(self, request, queryset):
@@ -156,6 +157,13 @@ class OrderInAdmin(ImportExportModelAdmin):
                 msg = u'订单(%s) 确认入库异常' % order.in_number
             self.message_user(request, msg)
     make_instore.short_description = u"确认入库"
+
+    def print_instore_detail(self, request, queryset):
+        for order in queryset:
+            in_number = order.in_number
+            context = {'order_product_list': OrderInProductship.objects.filter(orderin=in_number)}
+            return render(request, 'order/indetail.html', context)
+    print_instore_detail.short_description = u"打印入库单"
 
     def save_model(self, request, obj, form, change):
         if change:
@@ -249,7 +257,7 @@ class OrderOutAdmin(ImportExportModelAdmin):
                    'classes': ['collapse']}),
     ]
     radio_fields = {"out_store": admin.VERTICAL}
-    actions = ['make_outstore']
+    actions = ['make_outstore','print_outstore_detail']
 
     def make_outstore(self, request, queryset):
         for order in queryset:
@@ -263,6 +271,13 @@ class OrderOutAdmin(ImportExportModelAdmin):
                 msg = u'订单(%s) 确认出库异常' % order.out_number
             self.message_user(request, msg)
     make_outstore.short_description = u"确认出库"
+
+    def print_outstore_detail(self, request, queryset):
+        for order in queryset:
+            out_number = order.out_number
+            context = {'order_product_list': OrderOutProductship.objects.filter(orderout=out_number)}
+            return render(request, 'order/outdetail.html', context)
+    print_outstore_detail.short_description = u"打印出库单"
 
     def save_model(self, request, obj, form, change):
         if change:

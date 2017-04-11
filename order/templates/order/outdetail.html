@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>出库订单商品明细</h2>
+<ul>
+    <table border="0">
+        <thead>
+            <tr>
+
+                <th scope="col"  class="sortable column-id sorted descending">
+
+
+                    <div class="sortoptions">
+                        <a class="sortremove" href="?o=" title="Remove from sorting"></a>
+
+                        <a href="?o=0" class="toggle descending" title="Toggle sorting"></a>
+                    </div>
+
+
+                    <div class="text"><a href="?o=0">id</a></div>
+                    <div class="clear"></div>
+                </th>
+                <th scope="col"  class="sortable column-orderout">
+
+
+
+                    <div class="text"><a href="?o=1.-0">出库编号</a></div>
+                    <div class="clear"></div>
+                </th>
+                <th scope="col"  class="sortable column-product">
+
+
+
+                    <div class="text"><a href="?o=2.-0">商品信息</a></div>
+                    <div class="clear"></div>
+                </th>
+                <th scope="col"  class="sortable column-orderout_pcs">
+
+
+
+                    <div class="text"><a href="?o=3.-0">订单数量</a></div>
+                    <div class="clear"></div>
+                </th>
+                </tr>
+        </thead>
+        {% for order_product in order_product_list %}
+        <tr class="row1">
+            <td class="field-id">{{ order_product.id }}</td>
+            <td class="field-orderin">{{ order_product.orderout }}</td>
+            <td class="field-product">{{ order_product.product }}</td>
+            <td class="field-orderin_pcs">{{ order_product.orderout_pcs}}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    </ul>
+    {% endblock %}
