@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Publishers</h2>
+<ul>
+    <table border="0">
+        <thead>
+            <tr>
+
+                <th scope="col"  class="sortable column-name sorted descending">
+
+
+                    <div class="sortoptions">
+                        <a class="sortremove" href="?o=" title="Remove from sorting"></a>
+
+                        <a href="?o=0" class="toggle descending" title="Toggle sorting"></a>
+                    </div>
+
+
+                    <div class="text"><a href="?o=0">Name</a></div>
+                    <div class="clear"></div>
+                </th>
+                <th scope="col"  class="sortable column-address">
+
+
+
+                    <div class="text"><a href="?o=1.-0">Address</a></div>
+                    <div class="clear"></div>
+                </th>
+                <th scope="col"  class="sortable column-city">
+
+
+
+                    <div class="text"><a href="?o=2.-0">City</a></div>
+                    <div class="clear"></div>
+                </th>
+                <th scope="col"  class="sortable column-country">
+
+
+
+                    <div class="text"><a href="?o=3.-0">Country</a></div>
+                    <div class="clear"></div>
+                </th>
+                <th scope="col"  class="sortable column-state_province">
+
+
+
+                    <div class="text"><a href="?o=4.-0">State province</a></div>
+                    <div class="clear"></div>
+                </th>
+                <th scope="col"  class="sortable column-website">
+
+
+                    <div class="text"><a href="?o=5.-0">Website</a></div>
+                    <div class="clear"></div>
+                </th>
+            </tr>
+        </thead>
+        {% for publisher in object_list %}
+        <tr class="row1"><th class="field-name">{{ publisher.name }}</a></th><td class="field-address">{{ publisher.address }}</td><td class="field-city">{{ publisher.city }}</td><td class="field-country">{{ publisher.country}}</td><td class="field-state_province">{{ publisher.state_province }}</td><td class="field-website">{{ publisher.website }}</td></tr>
+        {% endfor %}
+    </table>
+    </ul>
+    {% endblock %}
