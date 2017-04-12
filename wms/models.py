@@ -86,7 +86,7 @@ class Product(models.Model):
         verbose_name_plural = u'商品'
 
     def __str__(self):
-        return "%s , %s , %s , %s" % (self.barcode, self.name, self.ename, self.help_name)
+        return "%s , %s , %s , %s" % (self.name, self.ename, self.help_name, self.specs)
 
     def volume(self):
         return self.width * self.height * self.length
