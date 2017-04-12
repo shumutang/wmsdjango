@@ -103,7 +103,6 @@ class OrderInResource(resources.ModelResource):
         import_id_fields = ('in_number' ,)
         fields = ('in_number', 'customer', 'warehouse', 'plan_in_time')
 
-
 class OrderInAdmin(ImportExportModelAdmin):
     resource_class = OrderInResource
     readonly_fields = ['in_store', ]
