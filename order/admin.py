@@ -100,6 +100,7 @@ class OrderOutProductshipInline(admin.TabularInline):
 class OrderInResource(resources.ModelResource):
     class Meta:
         model = OrderIn
+        import_id_fields = ('in_number' ,)
         fields = ('in_number', 'customer', 'warehouse', 'plan_in_time')
 
 
