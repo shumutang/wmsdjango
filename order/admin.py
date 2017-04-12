@@ -143,7 +143,6 @@ class OrderInAdmin(ImportExportModelAdmin):
     # radio_fields = {"in_store": admin.HORIZONTAL}
     # radio_fields = {"in_store": admin.VERTICAL}
     actions = ['make_instore', 'print_instore_detail']
-    localized_fields = ('fact_in_time',)
 
 
     def make_instore(self, request, queryset):
@@ -338,7 +337,7 @@ class OrderInProductshipResource(resources.ModelResource):
     class Meta:
         model = OrderInProductship
 
-class OrderInProductshipAdmin(admin.ModelAdmin):
+class OrderInProductshipAdmin(ImportExportModelAdmin):
     resource_class = OrderInProductshipResource
     list_per_page = 20
     list_display = ['id'
