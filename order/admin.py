@@ -8,6 +8,9 @@ from django.forms import ModelForm
 from django.contrib.admin.widgets import ForeignKeyRawIdWidget
 from django.contrib.admin.widgets import ManyToManyRawIdWidget
 
+from django.contrib.admin.templatetags.admin_urls import add_preserved_filters
+from django.http import HttpResponseRedirect
+
 from django.db.models import Count, Sum
 
 from time import time
@@ -31,7 +34,7 @@ class OrderInProductshipForm(forms.ModelForm):
         widgets = {
             'product': ForeignKeyRawIdWidget(OrderInProductship._meta.get_field("product").rel,
                                              admin.site,
-                                             attrs={'size': '40'}),
+                                             attrs={'size': '40', 'width': '15em'}),
             'orderin_pcs': forms.TextInput(attrs={'size': '10'}),
         }
 
@@ -140,8 +143,6 @@ class OrderInAdmin(ImportExportModelAdmin):
                    'classes': ['collapse']}),
     ]
 
-    # radio_fields = {"in_store": admin.HORIZONTAL}
-    # radio_fields = {"in_store": admin.VERTICAL}
     actions = ['make_instore', 'print_instore_detail']
 
 
@@ -169,7 +170,7 @@ class OrderInAdmin(ImportExportModelAdmin):
         if change:
             obj_old = self.model.objects.get(pk=obj.pk)
             if obj_old.in_store == 'y':
-                Msg = u'已完成订单，不能被修改'
+                Msg = u'已完成订单"%s"，不能被修改' % obj.in_number
                 self.message_user(request, Msg, 40)
             else:
                 super(OrderInAdmin, self).save_model(request, obj, form, change)
@@ -195,7 +196,7 @@ class OrderInAdmin(ImportExportModelAdmin):
 
     def delete_model(self, request, obj):
         if obj.in_store == 'y':
-            Msg = u'已完成订单，不能被删除'
+            Msg = u'已完成订单"%s"，不能被删除' % obj.in_number
             self.message_user(request, Msg, 40)
         else:
             super(OrderInAdmin, self).delete_model(request, obj)
@@ -208,13 +209,24 @@ class OrderInAdmin(ImportExportModelAdmin):
             return self.response_post_save_change(request, obj)
 
     def response_delete(self, request, obj_display, obj_id):
-        obj_old = self.model.objects.get(pk=obj_id)
-        post_url = reverse('admin:index', current_app=self.admin_site.name)
-        if obj_old.in_store == 'y':
-            return self.response_post_save_change(request, obj_old)
+        opts = self.model._meta
+        if self.has_change_permission(request, None):
+            post_url = reverse(
+                'admin:%s_%s_changelist' % (opts.app_label, opts.model_name),
+                current_app=self.admin_site.name,
+            )
+            preserved_filters = self.get_preserved_filters(request)
+            post_url = add_preserved_filters(
+                {'preserved_filters': preserved_filters, 'opts': opts}, post_url
+            )
         else:
+            post_url = reverse('admin:index', current_app=self.admin_site.name)
+        try:
+            self.model.objects.get(pk=obj_id)
+            return HttpResponseRedirect(post_url)
+        except:
             super(OrderInAdmin, self).response_delete(request, obj_display, obj_id)
-            return self.response_post_save_change(request, obj_old)
+            return HttpResponseRedirect(post_url)
 
 admin.site.register(OrderIn, OrderInAdmin)
 
@@ -284,7 +296,7 @@ class OrderOutAdmin(ImportExportModelAdmin):
         if change:
             obj_old = self.model.objects.get(pk=obj.pk)
             if obj_old.out_store == 'y':
-                Msg = u'已完成订单，不能被修改'
+                Msg = u'已完成订单"%s"，不能被修改' % obj.out_number
                 self.message_user(request, Msg, 40)
             else:
                 super(OrderOutAdmin, self).save_model(request, obj, form, change)
@@ -310,7 +322,7 @@ class OrderOutAdmin(ImportExportModelAdmin):
 
     def delete_model(self, request, obj):
         if obj.out_store == 'y':
-            Msg = u'已完成订单，不能被删除'
+            Msg = u'已完成订单"%s"，不能被删除' % obj.out_number
             self.message_user(request, Msg, 40)
             # messages.add_message(request, messages.ERROR, Msg)
         else:
@@ -324,13 +336,24 @@ class OrderOutAdmin(ImportExportModelAdmin):
             return self.response_post_save_change(request, obj)
 
     def response_delete(self, request, obj_display, obj_id):
-        obj_old = self.model.objects.get(pk=obj_id)
-        post_url = reverse('admin:index', current_app=self.admin_site.name)
-        if obj_old.out_store == 'y':
-            return self.response_post_save_change(request, obj_old)
+        opts = self.model._meta
+        if self.has_change_permission(request, None):
+            post_url = reverse(
+                'admin:%s_%s_changelist' % (opts.app_label, opts.model_name),
+                current_app=self.admin_site.name,
+            )
+            preserved_filters = self.get_preserved_filters(request)
+            post_url = add_preserved_filters(
+                {'preserved_filters': preserved_filters, 'opts': opts}, post_url
+            )
         else:
+            post_url = reverse('admin:index', current_app=self.admin_site.name)
+        try:
+            self.model.objects.get(pk=obj_id)
+            return HttpResponseRedirect(post_url)
+        except:
             super(OrderOutAdmin, self).response_delete(request, obj_display, obj_id)
-            return self.response_post_save_change(request, obj_old)
+            return HttpResponseRedirect(post_url)
 
 admin.site.register(OrderOut, OrderOutAdmin)
 
@@ -360,7 +383,6 @@ class OrderInProductshipAdmin(ImportExportModelAdmin):
         , 'product__specs'
     ]
     list_filter = ['orderin__in_store'
-        , 'orderin__operate_date'
         , 'orderin__fact_in_time'
     ]
     actions = None
@@ -475,7 +497,6 @@ class OrderOutProductshipAdmin(ImportExportModelAdmin):
     ]
     list_filter = ['orderout__out_store'
         , 'orderout__operate_date'
-        , 'orderout__fact_out_time'
     ]
     actions = None
     # raw_id_fields = ['product']
