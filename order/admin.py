@@ -185,11 +185,11 @@ class OrderInAdmin(ImportExportModelAdmin):
             super(OrderInAdmin, self).save_model(request, obj, form, change)
 
     def save_formset(self, request, form, formset, change):
-        orderout = form.instance
+        orderin = form.instance
         instances = formset.save(commit=False)
         for instance in instances:
-            if change and orderout.in_store == 'y':
-                Msg = u'已完成订单，不能被修改'
+            if change and orderin.in_store == 'y':
+                Msg = u'已完成订单"%s"，不能被修改' % orderin.in_number
                 self.message_user(request, Msg, 40)
             else:
                 super(OrderInAdmin, self).save_formset(request, form, formset, change)
@@ -249,7 +249,7 @@ class OrderOutAdmin(ImportExportModelAdmin):
         , 'serial_number'
         , 'operator'
         , 'operate_date']
-    search_fields = ['in_number', 'customer__name', 'warehouse__ename', ]
+    search_fields = ['out_number', 'customer__name', 'warehouse__ename', ]
     inlines = [OrderOutProductshipInline]
     fieldsets = [
         (None, {'fields': ['out_number'
@@ -315,7 +315,7 @@ class OrderOutAdmin(ImportExportModelAdmin):
         instances = formset.save(commit=False)
         for instance in instances:
             if change and orderout.out_store == 'y':
-                Msg = u'已完成订单，不能被修改'
+                Msg = u'已完成订单"%s"，不能被修改' % orderout.out_number
                 self.message_user(request, Msg, 40)
             else:
                 super(OrderOutAdmin, self).save_formset(request, form, formset, change)
